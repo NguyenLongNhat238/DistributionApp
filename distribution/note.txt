@@ -1,0 +1,65 @@
+Để viết một API upload file trả về dạng XMLHttpRequest để front-end có thể theo dõi tiến độ upload, bạn có thể sử dụng Django Rest Framework (DRF) để xây dựng API.
+
+Đầu tiên, bạn cần tạo một serializer để xử lý việc parse file upload từ request:
+
+python
+Copy code
+from rest_framework import serializers
+
+class FileUploadSerializer(serializers.Serializer):
+    file = serializers.FileField()
+Sau đó, bạn có thể tạo một APIView để xử lý việc upload file:
+
+python
+Copy code
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+
+class FileUploadView(APIView):
+    def post(self, request):
+        serializer = FileUploadSerializer(data=request.data)
+        if serializer.is_valid():
+            file = serializer.validated_data['file']
+            # Xử lý file tại đây
+
+            return Response({'status': 'success'})
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+Trong hàm post, serializer sẽ validate dữ liệu đầu vào và trả về một đối tượng validated_data chứa các trường hợp lệ. Bạn có thể sử dụng đối tượng file để xử lý file upload.
+
+Để trả về dạng XMLHttpRequest để front-end có thể theo dõi tiến độ upload, bạn cần chỉnh sửa phương thức post để thêm thông tin về tiến độ upload vào header của response. Bạn cần thiết lập response header X-Progress-ID bằng một giá trị duy nhất để cho phép front-end theo dõi tiến độ upload.
+
+python
+Copy code
+import uuid
+
+class FileUploadView(APIView):
+    def post(self, request):
+        serializer = FileUploadSerializer(data=request.data)
+        if serializer.is_valid():
+            file = serializer.validated_data['file']
+            # Xử lý file tại đây
+
+            response = Response({'status': 'success'})
+            response['X-Progress-ID'] = str(uuid.uuid4()) # Thiết lập giá trị duy nhất cho X-Progress-ID
+            return response
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+Sau đó, trong phần front-end, bạn có thể sử dụng XMLHttpRequest để gửi file upload đến API, và sử dụng XHR để theo dõi tiến độ upload. Ví dụ:
+
+javascript
+Copy code
+var formData = new FormData();
+formData.append('file', fileInput.files[0]);
+
+var xhr = new XMLHttpRequest();
+xhr.open('POST', '/api/upload/');
+xhr.upload.addEventListener('progress', function(event) {
+    if (event.lengthComputable) {
+        var percent = Math.round((event.loaded / event.total) * 100);
+        console.log('Upload progress:', percent, '%');
+    }
+});
+xhr.send(formData);
+Lưu ý rằng đoạn mã trên chỉ là một ví dụ đơn giản, bạn có thể tùy chỉnh để phù hợp với mô hình dữ liệu của mình.

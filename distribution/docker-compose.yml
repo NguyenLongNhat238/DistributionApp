@@ -1,0 +1,46 @@
+version: "3.7"
+
+services:
+  distributions:
+    container_name: distributions_backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: python manage.py runserver 0.0.0.0:3300
+    volumes:
+      - .:/distributions
+    ports:
+      - "3300:3300"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+  # celery_worker:
+  #   container_name: distributions_celery_worker
+  #   build: .
+  #   volumes:
+  #     - .:/distributions
+  #   command: celery -A core worker --loglevel=INFO
+  #   depends_on:
+  #     - rabbitmq
+  #   logging:
+  #     driver: "json-file"
+  #     options:
+  #       max-size: "200k"
+  #       max-file: "10"
+
+  # celery_scheduler:
+  #   container_name: distributions_celery_scheduler
+  #   build: .
+  #   volumes:
+  #     - .:/distributions
+  #   command: celery -A core beat -l info
+  #   depends_on:
+  #     - rabbitmq
+  #   logging:
+  #     driver: "json-file"
+  #     options:
+  #       max-size: "200k"
+  #       max-file: "10"
