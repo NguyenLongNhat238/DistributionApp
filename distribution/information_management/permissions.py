@@ -1,4 +1,5 @@
 from rest_framework import permissions
+from core_app.permissions import CompanyPermissionBase
 
 
 class ManagerCompanyPermissions(permissions.IsAuthenticated):
@@ -7,3 +8,7 @@ class ManagerCompanyPermissions(permissions.IsAuthenticated):
         Return `True` if permission is granted, `False` otherwise.
         """
         return request.user == obj.manager
+
+
+class EmployeePermissions(CompanyPermissionBase):
+    app_label = __module__.split(".")[0]

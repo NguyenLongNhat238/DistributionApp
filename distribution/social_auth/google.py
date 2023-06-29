@@ -13,7 +13,7 @@ class Google:
         try:
             idinfo = id_token.verify_oauth2_token(
                 auth_token, requests.Request())
-
+            # print(idinfo)
             if 'accounts.google.com' in idinfo['iss']:
                 return idinfo
 

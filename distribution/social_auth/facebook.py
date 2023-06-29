@@ -15,9 +15,12 @@ class Facebook:
             graph = facebook.GraphAPI(access_token=auth_token)
             # profile = graph.request('/me?fields=name,email')
 
-            profile = graph.get_object('me')
-            args = {'fields': 'id,name,email,picture', }
-            profile = graph.get_object('me', **args)
+            profile = graph.get_object("me")
+            args = {
+                "fields": "id,name,email,picture.type(large),first_name,last_name,gender,birthday,hometown,location,education,work",
+            }
+            profile = graph.get_object("me", **args)
+            # print(profile)
             return profile
         except:
             return "The token is invalid or expired."

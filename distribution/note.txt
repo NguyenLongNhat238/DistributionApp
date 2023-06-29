@@ -63,3 +63,23 @@ xhr.upload.addEventListener('progress', function(event) {
 });
 xhr.send(formData);
 Lưu ý rằng đoạn mã trên chỉ là một ví dụ đơn giản, bạn có thể tùy chỉnh để phù hợp với mô hình dữ liệu của mình.
+
+
+# Import data
+with transaction.atomic():
+    serializer_instances = [self.import_serializer_class(data=d) for d in data]
+    valid_serializers = [serializer for serializer in serializer_instances if serializer.is_valid()]
+    valid_objects = [serializer.save(commit=False) for serializer in valid_serializers]
+    ModelClass.objects.bulk_create(valid_objects)
+
+    count = len(    )
+    failure_count = len(serializer_instances) - count
+
+return Response(data={
+    'message': 'successfully',
+    'data': {
+        'success': f'{count} records',
+        'failure': f'{failure_count} records',
+        'error_description': error
+    }
+}, status=status.HTTP_200_OK)

@@ -1,16 +1,15 @@
 from django.contrib import admin
-from .models import Status, Delivery, DeliveryStatus, Transport
+from .models import Delivery, DeliveryStatus, Transport
+
 # Register your models here.
 
 
 class StatusAdmin(admin.ModelAdmin):
-    list_display = ['code', 'name']
-    readonly_fields = ['created_at', 'code',
-                       'updated_at', 'created_by', 'updated_by']
+    list_display = ["code", "name"]
+    readonly_fields = ["created_at", "code", "updated_at", "created_by", "updated_by"]
     # fields = ['code', 'name', 'description', 'created_at', 'updated_at']
 
 
-admin.site.register(Status, StatusAdmin)
 admin.site.register(Delivery)
 admin.site.register(DeliveryStatus)
 admin.site.register(Transport)

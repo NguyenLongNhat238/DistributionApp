@@ -2,62 +2,49 @@ from rest_framework import status
 
 
 class ErrorHandling:
+    default_message_en = "Something wrong!!"
+    default_message_vi = "Có gì đó đang gặp vấn đề!!"
 
-    def __init__(self, message, code, type=None, lang="vi", **kwargs):
+    def __init__(self, message_en, message_vi, code=None, lang="vi", **kwargs):
         self.code = code
-        self.type = type
         self.lang = lang
         self.kwargs = kwargs
-        message_split = message.split("/")
-        if len(message_split) == 1:
-            self.message = message
-        elif len(message_split) == 2:
-            if self.lang == "en":
-                self.message = message_split[1].strip()
-            else:
-                self.message = message_split[0].strip()
+        self.message_en = message_en
+        self.message_vi = message_vi
+        if lang == "en":
+            self.message = message_en if message_en else self.default_message_en
         else:
-            self.message = None
+            self.message = message_vi if message_vi else self.default_message_vi
 
     def to_representation(self):
         content = {
             "message": self.message,
-            "type": self.type,
-            "code": self.code
+            "vi": self.message_vi,
+            "en": self.message_en,
+            "code": self.code,
         }
         content = {**content, **self.kwargs}
-        r = {
-            "error": content
-        }
+        r = {"error": content}
         return r
 
 
 class SuccessHandling:
-    def __init__(self, message, code, type=None, lang="vi", **kwargs):
-        self.code = code
-        self.type = type
+    def __init__(self, message_vi, message_en, lang="vi", **kwargs):
         self.lang = lang
-        self.kwargs = kwargs
-        message_split = message.split("/")
-        if len(message_split) == 1:
-            self.message = message
-        elif len(message_split) == 2:
-            if self.lang == "en":
-                self.message = message_split[1].strip()
-            else:
-                self.message = message_split[0].strip()
+        self.message_en = message_en
+        self.message_vi = message_vi
+        if lang == "en":
+            self.message = message_en
         else:
-            self.message = None
+            self.message = message_vi
+        self.kwargs = kwargs
 
     def to_representation(self):
-
         content = {
             "message": self.message,
-            "type": self.type,
-            "code": self.code
+            "vi": self.message_vi,
+            "en": self.message_en,
         }
         content = {**content, **self.kwargs}
-        r = {
-            "success": content
-        }
+        r = {"success": content}
         return r

@@ -1,6 +1,6 @@
 def add_single_table(model: object, data: list):
     for item in data:
-        if item and item != '' and item != '*':
+        if item and item != "" and item != "*":
             record, created = model.all_objects.get_or_create(name=item)
             if created:
                 record.save()
@@ -19,12 +19,12 @@ class RelatedMixin:
                 queryset = queryset.select_related(*cls.select_related_fields)
         if hasattr(cls, "prefetch_related_fields"):
             if len(cls.prefetch_related_fields) > 0:
-                queryset = queryset.prefetch_related(
-                    *cls.prefetch_related_fields)
+                queryset = queryset.prefetch_related(*cls.prefetch_related_fields)
         if hasattr(cls, "sort_fields"):
             if len(cls.sort_fields) > 0:
                 queryset = queryset.order_by(*cls.sort_fields)
         return queryset
+
 
 # import tinify
 

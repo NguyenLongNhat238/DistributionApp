@@ -1,0 +1,86 @@
+<html>
+  <head>
+    <title>reCAPTCHA demo: Simple page</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+</head>
+  <body>
+    <div class="container text-center">
+    <a class="btn btn-success" onclick="startSSEImport()" > CLICK ME </a>
+    </div>
+    <div class="container text-center">
+      <form id="uploadForm" method="post" enctype="multipart/form-data">
+        {% comment %} {% csrf_token %} {% endcomment %}
+        <input type="file" name="excel_file" id="excelFileInput" accept=".xlsx, .xls">
+        <button type="submit">Upload</button>
+    </form>
+    </div>
+<script>
+  function startSSEImport(){
+    const eventSource = new EventSource('import-excel-progress/');
+
+eventSource.addEventListener('message', (event) => {
+  const progress = parseInt(event.data);
+  console.log('Progress:', progress);
+  // Cập nhật giao diện với tiến trình upload
+});
+
+eventSource.onerror = (error) => {
+  console.error('SSE Error:', error);
+};
+
+  }
+    function startSSE() {
+        // Tạo một đối tượng EventSource để lắng nghe sự kiện SSE
+        const endpoint = 'sse/';
+
+        // Tạo một XMLHttpRequest object
+        const xhr = new XMLHttpRequest();
+
+        // Thiết lập callback để xử lý dữ liệu nhận được
+        xhr.onreadystatechange = function() {
+          if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+            // Xử lý dữ liệu nhận được
+            const response = xhr.responseText;
+            console.log(response);
+            // Do something with the data...
+          }
+        };
+
+        // Gửi yêu cầu GET đến API streaming
+        xhr.open('GET', endpoint);
+        xhr.send();
+      }
+
+      document.getElementById('uploadForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Ngăn chặn submit form mặc định
+    
+        var form = event.target;
+        var fileInput = document.getElementById('excelFileInput');
+        var file = fileInput.files[0];
+    
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'products/import-excel/');
+        xhr.setRequestHeader('Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidHlwZSI6ImFjY2Vzc190b2tlbiIsInVzZXJuYW1lIjoiYWRtaW4iLCJlbWFpbCI6ImFkbWluQGdtYWlsLmNvbSIsImV4cCI6MTY4NDQwNjkwOH0.AjHJPCbbsaN9d-wsgyUOTII8ioHDtoZbBh9qSasTy7o');
+        xhr.setRequestHeader('HTTP_X_REQUESTED_WITH', 'XMLHttpRequest');
+    
+        var formData = new FormData();
+        formData.append('excel_file', file);
+        xhr.send(formData);
+    
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    var response = JSON.parse(xhr.responseText);
+                    console.log(response); // Xử lý phản hồi từ API
+                } else {
+                    console.error('Error:', xhr.status);
+                }
+            }
+        };
+    });
+</script>
+  </body>
+</html>

@@ -2,7 +2,6 @@ from rest_framework import status
 
 
 class ErrorHandling:
-
     def __init__(self, message, code, type=None, lang="vi", **kwargs):
         self.code = code
         self.type = type
@@ -20,15 +19,9 @@ class ErrorHandling:
             self.message = None
 
     def to_representation(self):
-        content = {
-            "message": self.message,
-            "type": self.type,
-            "code": self.code
-        }
+        content = {"message": self.message, "type": self.type, "code": self.code}
         content = {**content, **self.kwargs}
-        r = {
-            "error": content
-        }
+        r = {"error": content}
         return r
 
 
@@ -50,14 +43,7 @@ class SuccessHandling:
             self.message = None
 
     def to_representation(self):
-
-        content = {
-            "message": self.message,
-            "type": self.type,
-            "code": self.code
-        }
+        content = {"message": self.message, "type": self.type, "code": self.code}
         content = {**content, **self.kwargs}
-        r = {
-            "success": content
-        }
+        r = {"success": content}
         return r
