@@ -26,44 +26,50 @@ def add(x, y):
 
 @shared_task()
 def send_email_account_confirm_task(user_email, username, phone, otp_code):
-    '''
-        input: email, username, otp_code
-        send mail to email input
-    '''
+    """
+    input: email, username, otp_code
+    send mail to email input
+    """
 
-    mail_subject = 'Activate your account.'
+    mail_subject = "Activate your account."
     email_recipient = user_email
-    msg_html = render_to_string('acc_active.html', {
-        "phone": phone,
-        "useremail": user_email,
-        'username': username,
-        'otp_code': otp_code
-    })
+    msg_html = render_to_string(
+        "acc_active.html",
+        {
+            "phone": phone,
+            "useremail": user_email,
+            "username": username,
+            "otp_code": otp_code,
+        },
+    )
 
     email = EmailMessage(mail_subject, msg_html, to=[email_recipient])
-    email.content_subtype = 'html'
+    email.content_subtype = "html"
     email.send(fail_silently=True)
 
 
 @shared_task()
 def send_email_password_forgot_task(user_id):
-    '''
-        send mail to user to reset password
-    '''
+    """
+    send mail to user to reset password
+    """
     user = User.objects.get(id=user_id)
     current_site = CLIENT
-    mail_subject = 'Reset your password.'
+    mail_subject = "Reset your password."
     email_recipient = user.email
     link_reset_password = f"{current_site}/user/resetpassword/{urlsafe_base64_encode(force_bytes(user.pk))}/{User.reset_password_token(user)}"
-    msg_html = render_to_string('acc_password_forgot.html', {
-        'username': user.username,
-        'link_reset_password': link_reset_password,
-        # 'domain': current_site,
-        # 'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-        # 'token': CustomUser.reset_password_token(user),
-    })
+    msg_html = render_to_string(
+        "acc_password_forgot.html",
+        {
+            "username": user.username,
+            "link_reset_password": link_reset_password,
+            # 'domain': current_site,
+            # 'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+            # 'token': CustomUser.reset_password_token(user),
+        },
+    )
     email = EmailMessage(mail_subject, msg_html, to=[email_recipient])
-    email.content_subtype = 'html'
+    email.content_subtype = "html"
     email.send(fail_silently=True)
     return link_reset_password
 

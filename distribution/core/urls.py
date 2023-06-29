@@ -22,11 +22,13 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 
+from core_app.views import new_user
+
 
 schema_view = get_schema_view(
     openapi.Info(
         title="Distributions App",
-        default_version='v1',
+        default_version="v1",
         description="Distributions App From Officience",
         terms_of_service="https://www.google.com/policies/terms/",
         contact=openapi.Contact(email="longnhat.nguyen@officience.com"),
@@ -37,26 +39,41 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api-auth/', include('rest_framework.urls')),
-
-    path('api/', include('user.urls')),
-    path('api/', include("information_management.urls")),
-    path('api/', include("core_app.urls")),
-    path('api/', include("product.urls")),
-    path('api/', include("transaction.urls")),
-
-    re_path(r'^media/(?P<path>.*)$', serve,
-            {'document_root': settings.MEDIA_ROOT}),
-    re_path(r'^static/(?P<path>.*)$', serve,
-            {'document_root': settings.STATIC_ROOT}),
-
+    path("admin/", admin.site.urls),
+    path("oauth/", include("oauth2_provider.urls", namespace="oauth2_provider")),
+    # include app urls
+    path("", new_user, name="new_user"),
+    path("api-auth/", include("rest_framework.urls")),
+    # user urls register
+    path("api/", include("user.urls")),
+    path("api/", include("social_auth.urls")),
+    # app urls register
+    path("api/", include("information_management.urls")),
+    path("api/", include("core_app.urls")),
+    path("api/", include("product.urls")),
+    path("api/", include("transaction.urls")),
+    path("api/", include("delivery.urls")),
+    path("api/", include("payment.urls")),
+    path("api/", include("system_admin.urls")),
+    # media and static files url patterns for development
+    re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT}),
+    re_path(r"^static/(?P<path>.*)$", serve, {"document_root": settings.STATIC_ROOT}),
     # swagger
-    re_path(r'^swagger(?P<format>\.json|\.yaml)$',
-            schema_view.without_ui(cache_timeout=0), name='schema-json'),
-    re_path(r'^swagger/$', schema_view.with_ui('swagger',
-            cache_timeout=0), name='schema-swagger-ui'),
-    re_path(r'^redoc/$', schema_view.with_ui('redoc',
-            cache_timeout=0), name='schema-redoc'),
-    path('__debug__/', include(debug_toolbar.urls)),
+    re_path(
+        r"^swagger(?P<format>\.json|\.yaml)$",
+        schema_view.without_ui(cache_timeout=0),
+        name="schema-json",
+    ),
+    # swagger ui
+    re_path(
+        r"^swagger/$",
+        schema_view.with_ui("swagger", cache_timeout=0),
+        name="schema-swagger-ui",
+    ),
+    # redoc ui for swagger
+    re_path(
+        r"^redoc/$", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"
+    ),
+    # debug toolbar
+    path("__debug__/", include(debug_toolbar.urls)),
 ]

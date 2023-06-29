@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from core_app.serializers import CompanyModelBaseSerializer, ModelBaseSerializer, BaseModelUserCreatedSerializer
+from core_app.serializers import BaseCompanyUserCreatedSerializer, CompanyModelBaseSerializer, ModelBaseSerializer, BaseModelUserCreatedSerializer
 from user.serializers import UserBaseInformationSerializer
 from .models import Company, Customer, Employee, Supplier
 
@@ -33,17 +33,15 @@ class CompanyDetailSerializer(CompanySerializer):
         extra_kwargs = {**CompanySerializer.Meta.extra_kwargs}
 
 
-class CustomerSerializer(CompanyModelBaseSerializer, BaseModelUserCreatedSerializer):
+class CustomerSerializer(BaseCompanyUserCreatedSerializer):
     class Meta:
         model = Customer
-        fields = CompanyModelBaseSerializer.Meta.fields + BaseModelUserCreatedSerializer.Meta.fields + \
+        fields = BaseCompanyUserCreatedSerializer.Meta.fields + \
             ["first_name", "last_name", "shop_name", "full_address", "city",
                 "district", "ward", "street", "house_number", "phone_number", "notes", "channel"]
 
-        read_only_fields = BaseModelUserCreatedSerializer.Meta.read_only_fields + \
-            CompanyModelBaseSerializer.Meta.read_only_fields
-        extra_kwargs = {**CompanyModelBaseSerializer.Meta.extra_kwargs,
-                        **BaseModelUserCreatedSerializer.Meta.extra_kwargs}
+        read_only_fields = BaseCompanyUserCreatedSerializer.Meta.read_only_fields
+        extra_kwargs = {**BaseCompanyUserCreatedSerializer.Meta.extra_kwargs}
 
 
 class CustomerDetailSerializer(CustomerSerializer):
@@ -55,17 +53,14 @@ class CustomerDetailSerializer(CustomerSerializer):
         extra_kwargs = {**CustomerSerializer.Meta.extra_kwargs}
 
 
-class EmployeeSerializer(CompanyModelBaseSerializer, BaseModelUserCreatedSerializer):
+class EmployeeSerializer(BaseCompanyUserCreatedSerializer):
     class Meta:
         model = Employee
-        fields = CompanyModelBaseSerializer.Meta.fields + \
-            BaseModelUserCreatedSerializer.Meta.fields + \
+        fields = BaseCompanyUserCreatedSerializer.Meta.fields + \
             ["first_name", "last_name", "phone", "address"]
 
-        read_only_fields = BaseModelUserCreatedSerializer.Meta.read_only_fields + \
-            CompanyModelBaseSerializer.Meta.read_only_fields
-        extra_kwargs = {**CompanyModelBaseSerializer.Meta.extra_kwargs,
-                        **BaseModelUserCreatedSerializer.Meta.extra_kwargs}
+        read_only_fields = BaseCompanyUserCreatedSerializer.Meta.read_only_fields
+        extra_kwargs = {**BaseCompanyUserCreatedSerializer.Meta.extra_kwargs}
 
 
 class EmployeeDetailSerializer(EmployeeSerializer):
@@ -83,17 +78,14 @@ class SupplierBaseSerializer(serializers.ModelSerializer):
         fields = ["id", "code", "name"]
 
 
-class SupplierSerializer(CompanyModelBaseSerializer, BaseModelUserCreatedSerializer):
+class SupplierSerializer(BaseCompanyUserCreatedSerializer):
     class Meta:
         model = Supplier
-        fields = CompanyModelBaseSerializer.Meta.fields + \
-            BaseModelUserCreatedSerializer.Meta.fields + \
+        fields = BaseCompanyUserCreatedSerializer.Meta.fields + \
             ["name", "address", "tax_code"]
 
-        read_only_fields = BaseModelUserCreatedSerializer.Meta.read_only_fields + \
-            CompanyModelBaseSerializer.Meta.read_only_fields
-        extra_kwargs = {**CompanyModelBaseSerializer.Meta.extra_kwargs,
-                        **BaseModelUserCreatedSerializer.Meta.extra_kwargs}
+        read_only_fields = BaseCompanyUserCreatedSerializer.Meta.read_only_fields
+        extra_kwargs = {**BaseCompanyUserCreatedSerializer.Meta.extra_kwargs}
 
 
 class SupplierDetailSerializer(SupplierSerializer):

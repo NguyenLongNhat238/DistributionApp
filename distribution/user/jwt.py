@@ -11,9 +11,10 @@ import jwt
 
 
 class JWTAuthentication(BaseAuthentication):
-    '''
-        custom jwt for authentication
-    '''
+    """
+    custom jwt for authentication
+    """
+
     def authenticate(self, request):
         auth_header = get_authorization_header(request)
         auth_data = auth_header.decode("utf-8")
@@ -36,30 +37,47 @@ class JWTAuthentication(BaseAuthentication):
         token = auth_token[1]
 
         try:
-            payload = jwt.decode(
-                token, settings.SECRET_KEY, algorithms='HS256')
-            user_id = payload['id']
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms="HS256")
+            user_id = payload["id"]
             print(payload)
 
-            if payload['type'] != 'access_token':
+            if payload["type"] != "access_token":
                 raise exceptions.AuthenticationFailed(
-                    ErrorHandling(message="Mã token của bạn không hợp lệ / Your token code is incorrect", code="DATA INVALID", type="DATA INVALID", lang="vi").to_representation())
+                    ErrorHandling(
+                        message="Mã token của bạn không hợp lệ / Your token code is incorrect",
+                        code="DATA INVALID",
+                        type="DATA INVALID",
+                        lang="vi",
+                    ).to_representation()
+                )
             try:
                 user = User.objects.get(id=user_id)
                 # if not user.is_active:
                 #     raise exceptions.AuthenticationFailed({'error': 'user inactive'})
             except:
-                raise exceptions.NotFound({'error': 'user is not exist'})
+                raise exceptions.NotFound({"error": "user is not exist"})
 
             return (user, token)
 
         except jwt.ExpiredSignatureError as ex:
             raise exceptions.AuthenticationFailed(
-                ErrorHandling(message="Mã token đã hết hạn / Your token has expired", code="DATA INVALID", type="DATA INVALID", lang="vi").to_representation())
+                ErrorHandling(
+                    message="Mã token đã hết hạn / Your token has expired",
+                    code="DATA INVALID",
+                    type="DATA INVALID",
+                    lang="vi",
+                ).to_representation()
+            )
 
         except jwt.DecodeError as ex:
             raise exceptions.AuthenticationFailed(
-                ErrorHandling(message="Mã token của bạn không hợp lệ / Your token code is incorrect", code="DATA INVALID", type="DATA INVALID", lang="vi").to_representation())
+                ErrorHandling(
+                    message="Mã token của bạn không hợp lệ / Your token code is incorrect",
+                    code="DATA INVALID",
+                    type="DATA INVALID",
+                    lang="vi",
+                ).to_representation()
+            )
 
     def authenticate_header(self, request):
-        return 'provide'
+        return "provide"

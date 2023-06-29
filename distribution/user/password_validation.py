@@ -18,18 +18,20 @@ from django.utils.translation import ngettext
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'user.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "user.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'user.password_validation.MinimumLengthValidator',
+        "NAME": "user.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'user.password_validation.CommonPasswordValidator',
+        "NAME": "user.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'user.password_validation.NumericPasswordValidator',
+        "NAME": "user.password_validation.NumericPasswordValidator",
     },
 ]
+
+
 @functools.lru_cache(maxsize=None)
 def get_default_password_validators():
     return get_password_validators(AUTH_PASSWORD_VALIDATORS)
@@ -120,7 +122,7 @@ class MinimumLengthValidator:
     def validate(self, password, user=None):
         if len(password) < self.min_length:
             raise ValidationError(
-                f'Mật khẩu quá ngắn. Nó phải chứa ít nhất {self.min_length} ký tự.',
+                f"Mật khẩu quá ngắn. Nó phải chứa ít nhất {self.min_length} ký tự.",
                 code="password_too_short",
                 params={"min_length": self.min_length},
             )

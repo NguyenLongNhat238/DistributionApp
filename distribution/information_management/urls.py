@@ -10,16 +10,13 @@ else:
 
 router.register(prefix="companies", viewset=CompanyViewSet, basename="company")
 
-router.register(prefix="customers", viewset=CustomerViewSet,
-                basename="customers")
+router.register(prefix="customers", viewset=CustomerViewSet, basename="customers")
 
-router.register(prefix="employees", viewset=EmployeeViewSet,
-                basename="employees")
+router.register(prefix="employees", viewset=EmployeeViewSet, basename="employees")
 
-router.register(prefix="supplier", viewset=SupplierViewSet,
-                basename="supplier")
+router.register(prefix="supplier", viewset=SupplierViewSet, basename="supplier")
 
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path("", include(router.urls)),
 ]

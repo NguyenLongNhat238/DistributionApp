@@ -1,21 +1,38 @@
-import io
 from django.shortcuts import render
-import polars
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework import status, exceptions, viewsets, permissions, generics
-from core_app.serializers import ExcelFileSerializer, StandardDataExcelFieldMultipleDetailSerializer
+from rest_framework import status, permissions
 
-from core_app.views import BaseModelViewSet, RelatedQuerySetMixin
+from core_app.views import (
+    BaseModelViewSet,
+    BaseRelatedQueryViewSet,
+    RelatedQuerySetMixin,
+    ActionImportExcelViewSet,
+    ActionExportExcelViewSet,
+)
 from .models import Order, OrderDetail, Purchase, PurchaseDetail
-from .serializers import (ImportExcelOrderSerializer, OrderSerializer, OrderDetailSerializer, OrderDetailSerializerDetail,
-                          OrderSerializerDetail, PurchaseSerializer, PurchaseDetailSerializer)
+from .serializers import (
+    ImportExcelOrderSerializer,
+    ImportExcelPurchaseSerializer,
+    OrderSerializer,
+    OrderDetailSerializer,
+    OrderDetailSerializerDetail,
+    OrderSerializerDetail,
+    PurchaseSerializer,
+    PurchaseDetailSerializer,
+)
+
 # Create your views here.
 from django.db import transaction
 
 
-class OrderCreationViewSet(BaseModelViewSet, RelatedQuerySetMixin):
-    queryset = Order.objects.all()
+class OrderCreationViewSet(
+    BaseModelViewSet,
+    RelatedQuerySetMixin,
+    ActionImportExcelViewSet,
+    ActionExportExcelViewSet,
+):
+    queryset = Order.company_objects.all()
     serializer_class = OrderSerializer
     permission_classes = [permissions.IsAuthenticated]
     select_related_fields = ()
@@ -26,39 +43,66 @@ class OrderCreationViewSet(BaseModelViewSet, RelatedQuerySetMixin):
     detail_model = OrderDetail
     field_detail_model_name = "order_details"
     import_serializer_class = ImportExcelOrderSerializer
+    export_serializer = OrderSerializerDetail
 
     def create(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
 
-    @action(methods=["post"], detail=False, url_path="import-excel")
-    def import_excel(self, request):
-        file_serializer = StandardDataExcelFieldMultipleDetailSerializer(
-            data=request.data, context={'request': request},
-            model=self.model,
-            detail_model=self.detail_model,
-            add_exclude_fields=self.add_exclude_fields,
-            add_validate_fields=self.add_validate_fields,
-            field_detail_model_name=self.field_detail_model_name)
-        file_serializer.is_valid(raise_exception=True)
-        standard_data = file_serializer.save()
-        count = 0
-        position = 0
-        error = []
-        with transaction.atomic():
-            for data in standard_data:
-                serializer = self.import_serializer_class(data=data)
-                if serializer.is_valid():
-                    serializer.save()
-                    count = count + 1
-                else:
-                    error.append({f"row {position}": serializer.errors})
-                position = position + 1
-        return Response(data={'message': "successfully", "data": {
-            "success": f"{count} records",
-            "failure": f"{len(error)} records",
-            "error_description": error
-        }}, status=status.HTTP_200_OK)
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+
+class OrderDetailViewSet(BaseModelViewSet, RelatedQuerySetMixin):
+    queryset = OrderDetail.objects.all()
+    serializer_class = OrderDetailSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    select_related_fields = ("product",)
+    prefetch_related_fields = ()
+
+    def get_queryset(self):
+        query = self.get_related_queryset()
+        return query
+
+
+class PurchaseCreationViewSet(
+    BaseRelatedQueryViewSet, ActionImportExcelViewSet, ActionExportExcelViewSet
+):
+    queryset = Order.company_objects.all()
+    serializer_class = ImportExcelPurchaseSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    select_related_fields = BaseRelatedQueryViewSet.select_related_fields + ()
+    prefetch_related_fields = BaseRelatedQueryViewSet.prefetch_related_fields + ()
+    add_exclude_fields = ("order",)
+    add_validate_fields = ()
+    model = Purchase
+    detail_model = PurchaseDetail
+    field_detail_model_name = "perchase_details"
+    import_serializer_class = ImportExcelOrderSerializer
+    export_serializer = PurchaseSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
+
+
+class PurchaseDetailViewSet(BaseModelViewSet, RelatedQuerySetMixin):
+    queryset = PurchaseDetail.objects.all()
+    serializer_class = PurchaseDetailSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    select_related_fields = ("product",)
+    prefetch_related_fields = ()
+
+    def get_queryset(self):
+        query = self.get_related_queryset()
+        return query

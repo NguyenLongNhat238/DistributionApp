@@ -4,11 +4,11 @@ SEX = (
     ('none', 'none')
 )
 
-TRANSPORT = {
+TRANSPORT = (
     ('car', 'CAR'),
     ('motobike', 'MOTOBIKE'),
     ('truck', 'TRUCK'),
-}
+)
 
 
 

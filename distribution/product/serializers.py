@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.db.models import Avg
-from core_app.serializers import BaseModelUserCreatedSerializer, CompanyModelBaseSerializer
+from core_app.serializers import BaseCompanyUserCreatedSerializer, BaseModelUserCreatedSerializer, CompanyModelBaseSerializer
 from information_management.models import Company, Supplier
 from information_management.serializers import SupplierBaseSerializer
 from .models import MeasurementUnit, Product, Inventory, Warehouse, Category
@@ -12,31 +12,27 @@ class CategoryBaseSerializer(serializers.ModelSerializer):
         fields = ["id", "code", "name"]
 
 
-class CategorySerializer(CompanyModelBaseSerializer, BaseModelUserCreatedSerializer):
+class CategorySerializer(BaseCompanyUserCreatedSerializer):
     class Meta:
         model = Category
-        fields = CompanyModelBaseSerializer.Meta.fields + BaseModelUserCreatedSerializer.Meta.fields + \
+        fields = BaseCompanyUserCreatedSerializer.Meta.fields + \
             ["name", "description"]
 
-        read_only_fields = BaseModelUserCreatedSerializer.Meta.read_only_fields + \
-            CompanyModelBaseSerializer.Meta.read_only_fields
-        extra_kwargs = {**CompanyModelBaseSerializer.Meta.extra_kwargs,
-                        **BaseModelUserCreatedSerializer.Meta.extra_kwargs}
+        read_only_fields = BaseCompanyUserCreatedSerializer.Meta.read_only_fields
+        extra_kwargs = {**BaseCompanyUserCreatedSerializer.Meta.extra_kwargs}
 
 
-class ProductSerializer(CompanyModelBaseSerializer, BaseModelUserCreatedSerializer):
+class ProductSerializer(BaseCompanyUserCreatedSerializer):
     class Meta:
         model = Product
-        fields = CompanyModelBaseSerializer.Meta.fields + BaseModelUserCreatedSerializer.Meta.fields + \
+        fields = BaseCompanyUserCreatedSerializer.Meta.fields + \
             ["name", "short_name", "unit", "supplier", "category",
              "picture", "brand", "specification",
              "weight", "height", "length", "width",
              "purchase_price", "purchase_price_vat", "price_novat_box", "price_novat_pcs", "sold_price_vat_box", "sold_price_vat_pcs"]
 
-        read_only_fields = BaseModelUserCreatedSerializer.Meta.read_only_fields + \
-            CompanyModelBaseSerializer.Meta.read_only_fields
-        extra_kwargs = {**CompanyModelBaseSerializer.Meta.extra_kwargs,
-                        **BaseModelUserCreatedSerializer.Meta.extra_kwargs}
+        read_only_fields = BaseCompanyUserCreatedSerializer.Meta.read_only_fields
+        extra_kwargs = {**BaseCompanyUserCreatedSerializer.Meta.extra_kwargs}
 
 
 class ProductImportExcelSerializer(ProductSerializer):
@@ -100,15 +96,12 @@ class ProductDetailSerializer(ProductSerializer):
         read_only = True
 
 
-class InventorySerializer(CompanyModelBaseSerializer, BaseModelUserCreatedSerializer):
+class InventorySerializer(BaseCompanyUserCreatedSerializer):
     class Meta:
         model = Inventory
-        fields = CompanyModelBaseSerializer.Meta.fields + \
-            BaseModelUserCreatedSerializer.Meta.fields + \
+        fields = BaseCompanyUserCreatedSerializer.Meta.fields + \
             ["date", "input_quantity", "output_quantity", "real_quantity", "qty_box", "qty_bag",
                 "real_qty_box", "real_qty_bag", "note", "product"]
 
-        read_only_fields = BaseModelUserCreatedSerializer.Meta.read_only_fields + \
-            CompanyModelBaseSerializer.Meta.read_only_fields
-        extra_kwargs = {**CompanyModelBaseSerializer.Meta.extra_kwargs,
-                        **BaseModelUserCreatedSerializer.Meta.extra_kwargs}
+        read_only_fields = BaseCompanyUserCreatedSerializer.Meta.read_only_fields
+        extra_kwargs = {**BaseCompanyUserCreatedSerializer.Meta.extra_kwargs}

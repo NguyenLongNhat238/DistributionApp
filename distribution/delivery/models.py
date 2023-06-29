@@ -1,75 +1,76 @@
 from django.db import models
 from constant.choice import TRANSPORT
-from core_app.models import CompanyModelBase
+from core_app.models import CompanyModelBase, Status
 from user.models import User
-from datetime import datetime
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+
 # Create your models here.
 
 
-class Status(CompanyModelBase):
-    # TABLE_DELIVERY = "DELIVERY"
-    name = models.CharField(max_length=50, unique=True)
-    description = models.TextField(null=True, blank=True)
-    # entity = models.CharField()
-
-    def __str__(self) -> str:
-        if self.name:
-            return self.name
-        if self.code:
-            return self.code
-
-        return super().__str__()
-
-
 class Delivery(CompanyModelBase):
-    STATUS_DONE = 'Done'
-    STATUS_WAITING = 'Waiting'
-    STATUS_SHIPPING = 'Shipping'
-    DELIVERY_STATUS = {
-        (STATUS_DONE, 'Done'),
-        (STATUS_WAITING, 'Shipping'),
-        (STATUS_SHIPPING, 'Waiting')
-    }
-    delivery_status = models.CharField(
-        max_length=50, choices=DELIVERY_STATUS, default=STATUS_WAITING)
+    delivery_status = models.ForeignKey(
+        Status,
+        verbose_name=_("Delivery status"),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="delivery_status_related",
+        related_query_name="delivery_status",
+    )
     shipper = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, related_name='delivery_shipper_related')
+        User,
+        verbose_name=_("Shipper"),
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="delivery_shipper_related",
+    )
     order = models.ForeignKey(
-        "transaction.Order", on_delete=models.SET_NULL, null=True, related_name='delivery_order_related')
-    delivery_date = models.DateTimeField(null=True, blank=True)
-
-    def set_done(self):
-        self.delivery_status = self.STATUS_DONE
-        self.save()
-
-    def set_shipping(self):
-        self.delivery_status = self.STATUS_SHIPPING
-        self.save()
-
-    def set_waiting(self):
-        self.delivery_status = self.STATUS_WAITING
-        self.save()
+        "transaction.Order",
+        verbose_name=_("Order"),
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="delivery_order_related",
+    )
+    delivery_date = models.DateTimeField(_("Delivery date"), null=True, blank=True)
 
     def __str__(self) -> str:
         if self.code:
-            return f'{self.code}-{self.status}'
+            return f"{self.code}"
         if self.status:
             return self.status
         return super().__str__()
 
+    class Meta:
+        verbose_name = "Delivery"
+        verbose_name_plural = "Deliveries"
+
 
 class DeliveryStatus(models.Model):
     status = models.ForeignKey(
-        Status, on_delete=models.SET_NULL, null=True, related_name='delivery_status_status_related')
+        Status,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="delivery_status_status_related",
+        related_query_name="delivery_status_status",
+    )
     delivery = models.ForeignKey(
-        Delivery, on_delete=models.SET_NULL, null=True, related_name='delivery_status_delivery_related')
+        Delivery,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="delivery_status_delivery_related",
+    )
     note = models.TextField(null=True, blank=True)
-    date = models.DateTimeField(null=True, blank=True)
+    date = models.DateTimeField(null=True, blank=True, default=timezone.now)
 
     def __str__(self) -> str:
         if self.status and self.delivery:
-            return f'{self.status}-{self.delivery}'
+            return f"{self.status}-{self.delivery}"
         return super().__str__()
+
+    class Meta:
+        verbose_name = "DeliveryStatus"
+        verbose_name_plural = "DeliveryStatuses"
 
 
 class Transport(CompanyModelBase):
@@ -80,11 +81,15 @@ class Transport(CompanyModelBase):
 
     deliveries = models.ManyToManyField(Delivery, blank=True)
     shipper = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, related_name='transport_shipper_related')
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="transport_shipper_related",
+    )
 
     def __str__(self) -> str:
         if self.code:
-            return f'{self.code}'
+            return f"{self.code}"
         if self.name:
             return self.name
         return super().__str__()
