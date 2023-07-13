@@ -114,6 +114,7 @@ class UserInformationSerializer(serializers.ModelSerializer):
             "avatar",
             "identity_card",
             "address",
+            "date_joined",
         ]
         extra_kwargs = {
             "username": {"read_only": True},
@@ -135,6 +136,12 @@ class UserInformationSerializer(serializers.ModelSerializer):
                 setattr(instance, attr, value)
         instance.save()
         return instance
+
+
+class BaseUserInforSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["id", "avatar", "full_name", "sex"]
 
 
 class ChangePasswordUserSerializer(serializers.ModelSerializer):

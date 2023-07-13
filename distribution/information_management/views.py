@@ -5,12 +5,14 @@ from core_app.views import (
     BaseModelViewSet,
     ActionExportExcelViewSet,
 )
-from information_management.models import Company, Customer, Employee, Supplier
+from information_management.models import Company, Customer, Employee, Supplier, Channel
 from information_management.permissions import (
+    BlockedPermission,
     EmployeePermissions,
     ManagerCompanyPermissions,
 )
 from information_management.serializers import (
+    ChannelSerializer,
     CompanyDetailSerializer,
     CompanySerializer,
     CustomerSerializer,
@@ -37,11 +39,13 @@ class CompanyViewSet(BaseModelViewSet):
         return CompanySerializer
 
     def get_queryset(self):
-        return Company.objects.all()
+        return Company.objects.filter(manager=self.request.user)
 
     def get_permissions(self):
         if self.action in ["update", "destroy", "partial_update", "patch"]:
             return [ManagerCompanyPermissions()]
+        if self.action in ["create"]:
+            return [BlockedPermission()]
         return [permissions.IsAuthenticated()]
 
 
@@ -101,3 +105,16 @@ class SupplierViewSet(
         if self.action in ["retrieve"]:
             return SupplierDetailSerializer
         return SupplierSerializer
+
+
+class ChannelViewSet(BaseModelViewSet):
+    queryset = Channel.objects.all()
+    serializer_class = ChannelSerializer
+    model = Channel
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_serializer_class(self):
+        return ChannelSerializer
+
+    def get_queryset(self):
+        return Channel.objects.all()

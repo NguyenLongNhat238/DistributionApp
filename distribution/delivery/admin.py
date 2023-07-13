@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import Delivery, DeliveryStatus, Transport
+from core_app.admin import BaseAdminSite
 
 # Register your models here.
 
@@ -8,6 +9,16 @@ class StatusAdmin(admin.ModelAdmin):
     list_display = ["code", "name"]
     readonly_fields = ["created_at", "code", "updated_at", "created_by", "updated_by"]
     # fields = ['code', 'name', 'description', 'created_at', 'updated_at']
+
+
+class DeliveryAdmin(BaseAdminSite):
+    pass
+
+class DeliveryStatusAdmin(BaseAdminSite):
+    pass
+
+class TransportAdmin(BaseAdminSite):
+    pass
 
 
 admin.site.register(Delivery)

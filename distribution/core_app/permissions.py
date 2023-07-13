@@ -1,6 +1,6 @@
-from rest_framework import permissions
+from rest_framework import permissions, exceptions
 from django.apps import apps
-from system_admin.models import UserRole, Permission
+from system_admin.models import UserRole
 
 
 class BaseCompanyPermission(permissions.IsAuthenticated):
@@ -14,42 +14,38 @@ class BaseCompanyPermission(permissions.IsAuthenticated):
 
 
 class CompanyPermissionBase(permissions.IsAuthenticated):
-    app_label = __module__.split(".")[0]
-
     def has_permission(self, request, view):
-        # Lấy hành động trong yêu cầu
+        # get request method
         method = request.method
-        app_label = self.app_label
-        print("app_label", app_label)
+        # get app_label from view
+        app_label = view.__module__.split(".")[0]
+        # get permission from request method
         if request.user.role:
-            if request.user.role.code == UserRole.ROLE_SYSTEM_ADDMIN:
+            if (
+                request.user.is_company_manager() is True
+                or request.user.is_system_admin() is True
+            ):
                 return True
             if request.user.role.code == UserRole.ROLE_SYSTEM_EMPLOYEE:
-                # Kiểm tra hành động
                 if method in ["GET", "LIST"]:
-                    print("GET")
                     action = "View"
                     permission = f"{action}_{app_label}"
 
                 elif method == "POST":
-                    print("POST")
                     action = "Add"
                     permission = f"{action}_{app_label}"
 
                 elif method in ["PUT", "PATCH"]:
-                    print("PUT")
                     action = "Change"
                     permission = f"{action}_{app_label}"
 
                 elif method == "DELETE":
-                    print("DELETE")
                     action = "Delete"
                     permission = f"{action}_{app_label}"
                 else:
                     permission = app_label
-                # Kiểm tra quyền
+                # Examine permission of user
                 if request.user.has_permissions(permission):
-                    print("has_permissions", permission)
                     return True
 
         return False
@@ -58,6 +54,6 @@ class CompanyPermissionBase(permissions.IsAuthenticated):
         if (
             request.user.is_company_manager() is True
             or request.user.is_system_employee() is True
-        ) and obj.company == request.user.company is True:
+        ) and obj.company == request.user.company:
             return True
         return False

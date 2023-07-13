@@ -11,4 +11,9 @@ class ManagerCompanyPermissions(permissions.IsAuthenticated):
 
 
 class EmployeePermissions(CompanyPermissionBase):
-    app_label = __module__.split(".")[0]
+    pass
+
+
+class BlockedPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return False

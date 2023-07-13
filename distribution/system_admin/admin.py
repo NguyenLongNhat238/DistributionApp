@@ -20,5 +20,11 @@ class PermissionAdmin(admin.ModelAdmin):
         return False
 
 
-admin.site.register(UserRole)
+class UserRoleAdmin(admin.ModelAdmin):
+    list_display = ["name", "code"]
+    list_filter = ["name", "code"]
+    search_fields = ["name", "code"]
+
+
+admin.site.register(UserRole, UserRoleAdmin)
 admin.site.register(Permission, PermissionAdmin)

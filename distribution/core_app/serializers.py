@@ -4,7 +4,7 @@ import polars
 from rest_framework import serializers, exceptions
 from django.core import exceptions as core_exceptions
 from core_app.get_username import get_request
-from core_app.models import ExportedFile, ModelBase, CompanyModelBase, Status
+from core_app.models import ExportedFile, History, ModelBase, CompanyModelBase, Status
 from information_management.models import Customer, Employee, Supplier
 from product.models import Category, MeasurementUnit, Product
 from transaction.models import Order
@@ -17,6 +17,7 @@ class ModelBaseSerializer(serializers.ModelSerializer):
         abstract = True
         model = ModelBase
         fields = [
+            "id",
             "code",
             "status",
             "created_at",
@@ -368,3 +369,10 @@ class ExportedFileSerialzier(BaseCompanyUserCreatedSerializer):
         extra_kwargs = {
             **BaseCompanyUserCreatedSerializer.Meta.extra_kwargs,
         }
+
+
+class HistorySerialzier(serializers.ModelSerializer):
+    class Meta:
+        read_only = True
+        model = History
+        fields = ['id','action', 'model_name', 'object_id', 'data', 'user']

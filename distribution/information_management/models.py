@@ -2,8 +2,8 @@ from django.core.validators import RegexValidator
 from django.db import models
 from core_app.get_username import get_request
 from core_app.models import ModelBase, CompanyModelBase
-from user.models import User
 from django.utils.translation import gettext_lazy as _
+from django.conf import settings
 
 # Create your models here.
 
@@ -11,14 +11,14 @@ from django.utils.translation import gettext_lazy as _
 class Company(ModelBase):
     name = models.CharField(_("Company name"), max_length=50)
     users = models.ManyToManyField(
-        User,
+        settings.AUTH_USER_MODEL,
         verbose_name=_("List users member"),
         blank=True,
         related_name="company_users_related",
     )
     detail = models.TextField(_("Detail"), null=True, blank=True)
     manager = models.OneToOneField(
-        User,
+        settings.AUTH_USER_MODEL,
         verbose_name=_("Manager"),
         on_delete=models.SET_NULL,
         null=True,
@@ -112,7 +112,13 @@ class Customer(CompanyModelBase):
         _("Phone number"), max_length=50, blank=True, null=True
     )
     notes = models.TextField(_("Notes"), null=True, blank=True)
-    channel = models.CharField(_("Channel"), max_length=50, null=True, blank=True)
+    channel = models.ForeignKey(
+        "Channel",
+        verbose_name=_("Channel"),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
 
     @property
     def full_name(self):
@@ -131,3 +137,22 @@ class Customer(CompanyModelBase):
         if self.first_name:
             return self.first_name
         return super().__str__()
+
+
+class Channel(CompanyModelBase):
+    name = models.CharField(_("Channel name"), max_length=100)
+    description = models.TextField(_("Description"), null=True, blank=True)
+
+    def __str__(self) -> str:
+        if self.code:
+            return self.code
+        if self.name:
+            return self.name
+        return super().__str__()
+
+    class Meta:
+        constraints = CompanyModelBase.Meta.constraints + [
+            models.UniqueConstraint(
+                fields=["name", "company"], name="unique_channel_name_company"
+            ),
+        ]

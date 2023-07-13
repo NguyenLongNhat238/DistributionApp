@@ -7,7 +7,8 @@ from rest_framework.exceptions import AuthenticationFailed
 from constant.choice import DEFAULT_PASSWORD
 from oauth2_provider.models import AccessToken, Application, RefreshToken
 from oauthlib.common import generate_token
-from datetime import datetime, timedelta
+from datetime import  timedelta
+from django.utils import timezone
 
 
 def register_social_google_user(email, name, avatar):
@@ -43,7 +44,7 @@ def register_social_google_user(email, name, avatar):
         user=user,
         application=app,
         token=token,
-        expires=datetime.now() + timedelta(seconds=settings.TOKEN_EXPIRE_SECONDS),
+        expires=timezone.now() + timedelta(seconds=settings.TOKEN_EXPIRE_SECONDS),
         scope="read write",
     )
     RefreshToken.objects.create(
@@ -104,7 +105,7 @@ def register_social_facebook_user(fb_id, email, name, first_name, last_name, ava
         user=user,
         application=app,
         token=token,
-        expires=datetime.now() + timedelta(seconds=settings.TOKEN_EXPIRE_SECONDS),
+        expires=timezone.now() + timedelta(seconds=settings.TOKEN_EXPIRE_SECONDS),
         scope="read write",
     )
     RefreshToken.objects.create(

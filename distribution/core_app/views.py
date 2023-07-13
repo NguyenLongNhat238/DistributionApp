@@ -3,29 +3,29 @@ from django.conf import settings
 from django.views.generic import TemplateView
 from rest_framework.decorators import action
 from django.db import transaction
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from rest_framework import viewsets, status, generics, permissions, exceptions
 from rest_framework.response import Response
 from core_app.paginations import BasePagination
-from core_app.permissions import BaseCompanyPermission
+from core_app.permissions import BaseCompanyPermission, CompanyPermissionBase
 from core_app.serializers import (
     ExcelFileSerializer,
     ExportedFileSerialzier,
-    FileNameSerializer,
+    HistorySerialzier,
     StandardDataExcelFieldMultipleRowSerializer,
     StatusParameterSerializer,
     StatusSerializer,
 )
 from user.models import User
-from .models import ExportedFile, Status, StatusBase
+from .models import ExportedFile, History, Status, StatusBase
 from .res_handing import ErrorHandling
 import polars
 from django.core.files.base import ContentFile
 import tempfile
-from datetime import datetime
+from django.utils import timezone
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-
+from .res_handing import SuccessHandling
 
 # Create your views here.
 
@@ -62,18 +62,89 @@ class BaseModelViewSet(
     generics.RetrieveAPIView,
     generics.CreateAPIView,
     generics.UpdateAPIView,
+    generics.DestroyAPIView,
 ):
     pagination_class = BasePagination
 
-    def get_permissions(self):
-        if self.action in ["update", "destroy", "partial_update", "patch"]:
-            return [BaseCompanyPermission()]
-        return [permissions.IsAuthenticated()]
+    def get_queryset(self):
+        slug = self.kwargs.get("slug")
+        if slug:
+            queryset = self.get_queryset()
+            obj = get_object_or_404(queryset, slug=slug)
+            self.check_object_permissions(self.request, obj)
+        return super().get_queryset()
 
+    def get_permissions(self):
+        return [CompanyPermissionBase()]
+    
     def get_queryset(self):
         if self.model:
             return self.model.company_objects.all()
         return super().get_queryset()
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            # openapi.Parameter(
+            #     name="slug",
+            #     in_=openapi.IN_PATH,
+            #     type=openapi.TYPE_STRING,
+            #     description="Object slug",
+            #     required=True,
+            # ),
+            openapi.Parameter(
+                name="id",
+                in_=openapi.IN_PATH,
+                type=openapi.TYPE_STRING,
+                description="Object id",
+                required=True,
+            ),
+        ],
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            SuccessHandling(
+                message_en="Created successfully",
+                message_vi="Tạo thành công",
+            ).to_representation(),
+            status=status.HTTP_201_CREATED,
+            headers=headers,
+        )
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop("partial", False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, "_prefetched_objects_cache", None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+
+        return Response(
+            SuccessHandling(
+                message_en="Updated successfully",
+                message_vi="Cập nhật thành công",
+            ).to_representation(),
+        )
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        # self.perform_destroy(instance)
+        if request.data.get("is_delete", False) is True:
+            self.perform_destroy(instance)
+        else:
+            instance.status = StatusBase.STATUS_INACTIVE
+            instance.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class BaseRelatedQueryViewSet(BaseModelViewSet, RelatedQuerySetMixin):
@@ -234,7 +305,7 @@ class ActionExportExcelViewSet:
             # Create and save the ExportedFile
             exported_file = ExportedFile()
             exported_file.file.save(
-                f"{file_name}_{datetime.now().timestamp()}.xlsx", content_file
+                f"{file_name}_{timezone.now().timestamp()}.xlsx", content_file
             )
             exported_file.name_file = file_name
             exported_file.save()
@@ -301,6 +372,21 @@ class StatusViewSet(
     )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
+
+
+class HistoryViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView):
+    queryset = History.company_objects.all()
+    serializer_class = HistorySerialzier
+    pagination_class = BasePagination
+    permission_classes = [permissions.IsAuthenticated]
+
+
+from djmoney.settings import CURRENCY_CHOICES
+
+
+class CurrencyListViewSet(viewsets.ViewSet):
+    def list(self, request, *args, **kwargs):
+        return Response(CURRENCY_CHOICES, status=status.HTTP_200_OK)
 
 
 def streaming_api(request):
@@ -391,3 +477,8 @@ class TestingViewSet(viewsets.ViewSet):
         print(model_names)
 
         return Response(data={"message": "success"}, status=status.HTTP_200_OK)
+
+
+class TimeNowViewSet(viewsets.ViewSet):
+    def list(self, request, *args, **kwargs):
+        return Response(data={"time": timezone.localtime()}, status=status.HTTP_200_OK)

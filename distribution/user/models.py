@@ -1,12 +1,12 @@
 from collections.abc import Iterable
-from datetime import datetime, timedelta
+from django.utils import timezone
+from datetime import timedelta
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from django.db import models
 from django.core.validators import RegexValidator
 import jwt
-
 from information_management.models import Company
 
 
@@ -63,17 +63,42 @@ class User(AbstractUser):
     def __str__(self):
         return self.phone
 
-    def is_system_admin(self):
-        return self.role.code == self.role.ROLE_SYSTEM_ADDMIN
+    def is_system_admin(self) -> bool:
+        return self.role.is_system_admin()
 
-    def is_system_employee(self):
-        return self.role.code == self.role.ROLE_SYSTEM_EMPLOYEE
+    def is_system_employee(self) -> bool:
+        return self.role.is_system_employee()
+
+    def is_shipper(self) -> bool:
+        return self.role.is_shipper()
 
     def is_company_manager(self):
-        return Company.objects.filter(manager=self).exists()
+        if Company.objects.filter(manager=self).exists():
+            return True
+        return None
+
+    @property
+    def role_name(self):
+        if self.role:
+            return self.role.name
+        return None
+
+    @property
+    def role_code(self):
+        if self.role:
+            return self.role.code
+        return None
+
+    def has_permissions(self, permission):
+        """
+        Check if user has permissions
+        """
+        if self.role:
+            return self.role.has_permissions(permission)
+        return False
 
     def has_user_management_permission(self):
-        return self.role.has_user_management_permission
+        return self.role.has_user_management_permission()
 
     def set_sex_male(self):
         self.sex = self.SEX_MALE
@@ -109,7 +134,7 @@ class User(AbstractUser):
                 "type": "access_token",
                 "username": self.username,
                 "email": self.email,
-                "exp": datetime.utcnow() + timedelta(days=1),
+                "exp": timezone.now() + timedelta(days=1),
             },
             settings.SECRET_KEY,
             algorithm="HS256",
@@ -127,7 +152,7 @@ class User(AbstractUser):
                 "type": "refresh_token",
                 "username": self.username,
                 "email": self.email,
-                "exp": datetime.utcnow() + timedelta(days=27),
+                "exp": timezone.now() + timedelta(days=27),
             },
             settings.SECRET_KEY,
             algorithm="HS256",
@@ -145,7 +170,7 @@ class User(AbstractUser):
                 "username": username,
                 "email": email,
                 "random_code": random_code,
-                "exp": datetime.utcnow() + timedelta(minutes=5),
+                "exp": timezone.now() + timedelta(minutes=5),
             },
             settings.SECRET_KEY,
             algorithm="HS256",
@@ -163,17 +188,9 @@ class User(AbstractUser):
                 "type": "reset_password_token",
                 "username": user.username,
                 "email": user.email,
-                "exp": datetime.utcnow() + timedelta(minutes=45),
+                "exp": timezone.now() + timedelta(minutes=45),
             },
             settings.SECRET_KEY,
             algorithm="HS256",
         )
         return token
-
-    def has_permissions(self, permission):
-        """
-        Check if user has permissions
-        """
-        if self.role:
-            return self.role.has_permissions(permission)
-        return False

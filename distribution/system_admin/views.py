@@ -33,7 +33,7 @@ class UserRoleViewSet(
     generics.UpdateAPIView,
     generics.DestroyAPIView,
 ):
-    queryset = UserRole.objects.all()
+    queryset = UserRole.company_objects.all()
     serializer_class = UserRoleSerializer
     permission_classes = [SystemAdminPermission]
 
@@ -43,7 +43,9 @@ class UserRoleViewSet(
         return super().get_serializer_class()
 
 
-class UserViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView):
+class UserViewSet(
+    viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView
+):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [SystemAdminPermission]
@@ -59,7 +61,12 @@ class UserViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView
         return super().get_object()
 
     def get_queryset(self):
-        query = User.objects.filter(company=self.request.user.company)
+        company = (
+            self.request.user.company
+            if self.request.user.company
+            else self.request.user.company_manager_related
+        )
+        query = User.objects.filter(company=company)
         return query
 
     def create(self, request, *args, **kwargs):

@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 import os
 from pathlib import Path
+from django.utils.translation import gettext_lazy as _
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,114 +22,124 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-i*jnz&x)(4n-ja#bjea7i806e-tp5%nua$7va%*k3@539yv*w_'
+SECRET_KEY = "django-insecure-i*jnz&x)(4n-ja#bjea7i806e-tp5%nua$7va%*k3@539yv*w_"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
 
 INSTALLED_APPS = [
-    'whitenoise.runserver_nostatic',
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'rest_framework',
-    'corsheaders',
+    "daphne",
+    "whitenoise.runserver_nostatic",
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "rest_framework",
+    "corsheaders",
+    "sse",
+    "channels",
+    "oauth2_provider",
     # Django money
-    'djmoney',
-    'django.contrib.humanize',
+    "djmoney",
+    "django.contrib.humanize",
     # swagger
-    'drf_yasg',
+    "drf_yasg",
     # Debug toolbar
-    'debug_toolbar',
+    "debug_toolbar",
     # celery
-    'celery',
+    "celery",
     "django_celery_results",
+    "django_extensions",
     # "django_celery_beat",
     # core app
-    'core_app.apps.CoreAppConfig',
+    "core_app.apps.CoreAppConfig",
     # App config
-    'user.apps.UserConfig',
-    'social_auth.apps.SocialAuthConfig',
-    'delivery.apps.DeliveryConfig',
-    'information_management.apps.InformationManagementConfig',
-    'payment.apps.PaymentConfig',
-    'product.apps.ProductConfig',
-    'transaction.apps.TransactionConfig',
-
-
+    "user.apps.UserConfig",
+    "social_auth.apps.SocialAuthConfig",
+    "delivery.apps.DeliveryConfig",
+    "information_management.apps.InformationManagementConfig",
+    "payment.apps.PaymentConfig",
+    "product.apps.ProductConfig",
+    "transaction.apps.TransactionConfig",
+    "system_admin.apps.SystemAdminConfig",
 ]
 
 MIDDLEWARE = [
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
-    'core_app.get_username.RequestMiddleware',
+    "core.middlewares.TimezoneMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
+    "core_app.get_username.RequestMiddleware",
+    # "core.middlewares.HideResponseMiddleware",
+    # "channels.middleware.AuthMiddlewareStack",
     ####
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
 
-ROOT_URLCONF = 'core.urls'
+ROOT_URLCONF = "core.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'core.wsgi.application'
-
+WSGI_APPLICATION = "core.wsgi.application"
+ASGI_APPLICATION = "core.routing.application"
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    "default": {
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": "distribution_db",
+        "USER": "postgres",
+        "PASSWORD": "postgres",
+        "HOST": "database",
+        "PORT": "5432",
+    },
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
@@ -136,102 +147,208 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+# LANGUAGE_CODE = "en-us"
+LANGUAGES = [
+    ("en", _("English")),
+    ("fr", _("French")),
+    ("vi", _("Vietnamese")),
+    # Thêm các ngôn ngữ khác nếu cần
+]
 
-TIME_ZONE = 'UTC'
+# LOCALE_PATHS = (os.path.join(BASE_DIR, "locale"),)
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, "locale"),
+]
+
+LANGUAGE_CODE = "en-us"
+
+TIME_ZONE = "Asia/Ho_Chi_Minh"
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
 USE_THOUSAND_SEPARATOR = True
-THOUSAND_SEPARATOR = ','
+THOUSAND_SEPARATOR = ","
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = "static/"
 
 # Media file to save or upload media and show up
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 # Declare static directory
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static')
-]
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 
 # Declare static root to external dislay static file
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 # Declare user to authenticate
-AUTH_USER_MODEL = 'user.User'
+AUTH_USER_MODEL = "user.User"
 
 # declare login
-LOGIN_URL = 'rest_framework:login'
-LOGOUT_URL = 'rest_framework:logout'
-CSRF_TRUSTED_ORIGINS = [""]
+LOGIN_URL = "rest_framework:login"
+LOGOUT_URL = "rest_framework:logout"
+LOGIN_REDIRECT_URL = "new_user"
+# CSRF_TRUSTED_ORIGINS = [""]
 CORS_ALLOW_ALL_ORIGINS = True
-CSRF_TRUSTED_ORIGINS = ['https://oreal-api.officience.com', 'http://oreal-api.officience.com',
-                        'http://172.16.1.27:2308', 'http://127.0.0.1:2308']
+CORS_ALLOW_HEADERS = (
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+    "x-forwarded-for",
+    "x-forwarded-host",
+    "x-forwarded-proto",
+    "timezone",
+)
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://oreal-api.officience.com",
+    "http://oreal-api.officience.com",
+    "http://172.16.1.27:3300",
+    "http://127.0.0.1:3300",
+]
 
 AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',
-    'user.authentication.CustomAuthenticationBackend',
+    "user.authentication.CustomAuthenticationBackend",
+    # "oauth2_provider.backends.CustomOAuth2Backend",
+    "django.contrib.auth.backends.ModelBackend",
 )
 
 REST_FRAMEWORK = {
-    'DEFAULT_RENDERER_CLASSES': (
-        'rest_framework.renderers.JSONRenderer',
-    ),
+    "DEFAULT_RENDERER_CLASSES": ("rest_framework.renderers.JSONRenderer",),
     # 'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAdminUser',),
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'user.jwt.JWTAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.SessionAuthentication'
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "oauth2_provider.contrib.rest_framework.OAuth2Authentication",
+        "rest_framework.authentication.SessionAuthentication",
+        "user.jwt.JWTAuthentication",
     ],
-    'DEFAULT_PARSER_CLASSES': [
-        'rest_framework.parsers.JSONParser',
-        'rest_framework.parsers.FormParser',
-        'rest_framework.parsers.MultiPartParser'
+    "DEFAULT_PARSER_CLASSES": [
+        "rest_framework.parsers.JSONParser",
+        "rest_framework.parsers.FormParser",
+        "rest_framework.parsers.MultiPartParser",
     ],
-    'DEFAULT_PAGINATION_CLASS':
-        'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 100,
-    'ORDERING_PARAM': 'ordering',
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 100,
+    "ORDERING_PARAM": "ordering",
 }
 
 if DEBUG:
     import socket  # only if you haven't already imported this
+
     hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
-    INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips] + \
-        ["127.0.0.1", "localhost", "172.16.1.27"]
+    INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips] + [
+        "127.0.0.1",
+        "localhost",
+        "172.16.1.27",
+    ]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 # Django core email
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 
-EMAIL_HOST_PASSWORD =
+EMAIL_HOST_USER = "openreal@officience.com"
+EMAIL_HOST_PASSWORD = "qqeF6M><"
 
+# swagger settings for drf_yasg
 SWAGGER_SETTINGS = {
-    'SECURITY_DEFINITIONS': {
-        'basic': {
-            'type': 'basic'
-        }
-    },
-
+    "SECURITY_DEFINITIONS": {"basic": {"type": "basic"}},
+    "DOC_EXPANSION": "none",
+    "DEFAULT_AUTO_SCHEMA_CLASS": "drf_yasg.inspectors.SwaggerAutoSchema",
 }
 
 REDOC_SETTINGS = {
-    'LAZY_RENDERING': False,
+    "LAZY_RENDERING": False,
+}
+
+
+# configuaration redis documents
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("redis://:JJk8iBHoFgLKtZ.zMQ!jz!T!@ozJ@cache:6379/0")],
+        },
+    },
+}
+
+# configuaration redis documents https://github.com/jazzband/django-redis
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://cache:6379/1",  # Địa chỉ và cổng Redis
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "PASSWORD": "JJk8iBHoFgLKtZ.zMQ!jz!T!@ozJ",
+            "SOCKET_CONNECT_TIMEOUT": 5,  # seconds
+            "SOCKET_TIMEOUT": 5,  # seconds
+            "IGNORE_EXCEPTIONS": True,
+            "CONNECTION_POOL_KWARGS": {
+                "max_connections": 100,
+                "retry_on_timeout": True,
+            },
+        },
+        "KEY_PREFIX": "distributions",  # Tiền tố key (tuỳ chọn)
+    }
+}
+
+CELERY_BROKER_URL = "redis://:JJk8iBHoFgLKtZ.zMQ!jz!T!@ozJ@cache:6379/0"
+CELERY_RESULT_BACKEND = "redis://:JJk8iBHoFgLKtZ.zMQ!jz!T!@ozJ@cache:6379/0"
+CELERY_ACCEPT_CONTENT = ["application/json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+
+
+SSE_BACKEND = "django_sse.backends.redis.RedisSSEBackend"
+SSE_REDIS_URL = "redis://:JJk8iBHoFgLKtZ.zMQ!jz!T!@ozJ@localhost:6379/0"
+SSE_REDIS_LOCATION = "sse"
+SSE_DEFAULT_CHANNEL = "default"
+SSE_CHANNEL_LAYER_ALIAS = "sse"
+
+
+REDIS_SSEQUEUE_CONNECTION_SETTINGS = {
+    "location": "cache:6379",
+    "password": "JJk8iBHoFgLKtZ.zMQ!jz!T!@ozJ",
+    "db": 0,
+}
+
+# Cache session
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
+
+# Oauth2 configuration for token expire
+TOKEN_EXPIRE_SECONDS = 86400  # 1 day
+REFESH_TOKEN_EXPIRE_SECONDS = 86400 * 30  # 30 days
+
+# Oauth2 configuration for token expir
+OAUTH2_PROVIDER = {
+    "ACCESS_TOKEN_EXPIRE_SECONDS": TOKEN_EXPIRE_SECONDS,
+    "REFRESH_TOKEN_EXPIRE_SECONDS": REFESH_TOKEN_EXPIRE_SECONDS,
+    # "OAUTH2_BACKEND_CLASS": "oauth2_provider.oauth2_backends.JSONOAuthLibCore",
+    "SCOPES_BACKEND_CLASS": "oauth2_provider.scopes.SettingsScopes",
+    "SCOPES": {
+        "read": "Read scope",
+        "write": "Write scope",
+        "groups": "Access to your groups",
+        "profile": "Access to your profile",
+    },
 }

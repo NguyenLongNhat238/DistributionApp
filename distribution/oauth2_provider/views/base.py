@@ -20,6 +20,7 @@ from ..scopes import get_scopes_backend
 from ..settings import oauth2_settings
 from ..signals import app_authorized
 from .mixins import OAuthLibMixin
+from constant.config import MANAGER
 
 
 log = logging.getLogger("oauth2_provider")
@@ -312,8 +313,15 @@ class CustomTokenView(TokenView):
             if access_token is not None:
                 token = get_access_token_model().objects.get(token=access_token)
                 app_authorized.send(sender=self, request=request, token=token)
-                body["role"] = token.user.role.name
-                body["permissions"] = list(token.user.role.get_permissions_code)
+                body["role"] = (
+                    MANAGER
+                    if token.user.is_company_manager() is True
+                    else token.user.role_code
+                )
+                body["permissions"] = list(
+                    token.user.role.get_permissions_code if token.user.role else []
+                )
+                body["user"] = token.user.id
                 body = json.dumps(body)
         response = HttpResponse(content=body, status=status)
         for k, v in headers.items():
