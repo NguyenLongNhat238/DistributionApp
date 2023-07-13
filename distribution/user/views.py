@@ -1,11 +1,11 @@
-import datetime
-from doctest import REPORT_NDIFF
+from django.utils import timezone
 from rest_framework import viewsets, permissions, generics
 from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from .permissions import OwnerUserPerms
 from .serializers import (
+    BaseUserInforSerializer,
     LoginSerializer,
     SignupSerializer,
     UserInformationSerializer,
@@ -92,7 +92,7 @@ class UserViewSet(viewsets.ViewSet):
                 )
 
             serializer = LoginSerializer(user)
-            user.last_login = datetime.datetime.now()
+            user.last_login = timezone.now()
             user.save()
             return Response(
                 SuccessHandling(
@@ -351,7 +351,7 @@ class UserInformationViewSet(
     serializer_class = UserInformationSerializer
 
     def get_permissions(self):
-        if self.action in ["current_user"]:
+        if self.action in ["current_user", "base"]:
             return [permissions.IsAuthenticated()]
         if self.action in ["update", "destroy", "partial_update", "change_password"]:
             return [OwnerUserPerms()]
@@ -376,6 +376,11 @@ class UserInformationViewSet(
             self.serializer_class(request.user, context={"request": request}).data,
             status=status.HTTP_200_OK,
         )
+
+    @action(methods=["get"], url_path="base", detail=False)
+    def base(self, request):
+        serializer = BaseUserInforSerializer(request.user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(methods=["post"], url_path="change-password", detail=True)
     def change_password(self, request, pk):

@@ -6,12 +6,6 @@ from .models import *
 # Register your models here.
 
 
-admin.site.site_header = "DISTRIBUTIONS"
-admin.site.index_title = "Management Area"
-admin.site.site_title = "Distributions"
-admin.site.site_url = ""
-
-
 class CompanyAdmin(admin.ModelAdmin):
     list_display = ["code", "id", "name", "manager"]
     readonly_fields = [
@@ -41,7 +35,12 @@ class SupplierAdmin(BaseAdminSite):
     pass
 
 
+class ChannelAdmin(BaseAdminSite):
+    pass
+
+
 admin.site.register(Company, CompanyAdmin)
 admin.site.register(Employee, EmployeeAdmin)
 admin.site.register(Supplier, SupplierAdmin)
 admin.site.register(Customer, CustomerAdmin)
+admin.site.register(Channel, ChannelAdmin)

@@ -2,12 +2,15 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter, SimpleRouter
 from .views import (
     BaseStatusViewSet,
+    CurrencyListViewSet,
+    HistoryViewSet,
     RecaptchaTemplateView,
     # streaming_api,
     HistoryExportFileViewSet,
     TestingViewSet,
     RelatedModelViewSet,
     StatusViewSet,
+    TimeNowViewSet,
 )
 from django.conf import settings
 
@@ -29,6 +32,11 @@ router.register(
 )
 router.register(prefix="status", viewset=StatusViewSet, basename="status")
 router.register(prefix="testing", viewset=TestingViewSet, basename="testing")
+router.register(prefix="histories", viewset=HistoryViewSet, basename="histories")
+router.register(
+    prefix="currency-list", viewset=CurrencyListViewSet, basename="currency-list"
+)
+router.register(prefix="time-now", viewset=TimeNowViewSet, basename="time-now")
 
 urlpatterns = [
     path("", include(router.urls)),

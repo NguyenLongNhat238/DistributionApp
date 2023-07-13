@@ -65,8 +65,8 @@ class OrderPayment(CompanyModelBase):
         return super().__str__()
 
     class Meta:
-        verbose_name = "Payment"
-        verbose_name_plural = "Payments"
+        verbose_name = "Order Payment"
+        verbose_name_plural = "Order Payments"
 
 
 class PurchasePayment(CompanyModelBase):
@@ -129,5 +129,5 @@ class PurchasePayment(CompanyModelBase):
         return super().__str__()
 
     class Meta:
-        verbose_name = "Payment"
-        verbose_name_plural = "Payments"
+        verbose_name = "Purchase Payment"
+        verbose_name_plural = "Purchase Payments"

@@ -6,7 +6,6 @@ from .models import User
 from django.utils.html import mark_safe, format_html
 
 
-
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = User
@@ -23,6 +22,8 @@ class UserDisplay(UserAdmin):
             return mark_safe(
                 '<img src="/media/{url}" width="240" />'.format(url=obj.avatar.name)
             )
+
+    save_on_top = True
 
     fieldsets = (
         (None, {"fields": ("phone", "username", "password", "role", "company")}),
@@ -53,7 +54,7 @@ class UserDisplay(UserAdmin):
         ),
         (
             ("Information address"),
-            {"fields": ("identity_card", "city", "district", "ward", "street")},
+            {"fields": ("identity_card", "address", "status")},
         ),
     )
     add_fieldsets = (
@@ -65,7 +66,6 @@ class UserDisplay(UserAdmin):
                     "email",
                     "username",
                     "phone",
-                    "sex",
                     "first_name",
                     "last_name",
                     "password1",

@@ -72,6 +72,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "core.middlewares.TimezoneMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",
@@ -162,6 +163,7 @@ LOCALE_PATHS = [
 LANGUAGE_CODE = "en-us"
 
 TIME_ZONE = "Asia/Ho_Chi_Minh"
+# TIME_ZONE = "UTC"
 
 USE_I18N = True
 USE_L10N = True
@@ -196,6 +198,21 @@ LOGOUT_URL = "rest_framework:logout"
 LOGIN_REDIRECT_URL = "new_user"
 # CSRF_TRUSTED_ORIGINS = [""]
 CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_HEADERS = (
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+    "x-forwarded-for",
+    "x-forwarded-host",
+    "x-forwarded-proto",
+    "timezone",
+)
 CSRF_TRUSTED_ORIGINS = [
     "https://oreal-api.officience.com",
     "http://oreal-api.officience.com",
@@ -204,7 +221,7 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 AUTHENTICATION_BACKENDS = (
-    # "user.authentication.CustomAuthenticationBackend",
+    "user.authentication.CustomAuthenticationBackend",
     # "oauth2_provider.backends.CustomOAuth2Backend",
     "django.contrib.auth.backends.ModelBackend",
 )
@@ -250,7 +267,6 @@ EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = ""
 EMAIL_HOST_PASSWORD = ""
-
 
 # swagger settings for drf_yasg
 SWAGGER_SETTINGS = {

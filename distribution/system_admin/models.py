@@ -4,6 +4,7 @@ from django.db.models.signals import post_migrate
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 from core_app.get_username import get_request
+from core_app.models import CompanyManager
 
 # Create your models here.
 
@@ -37,6 +38,9 @@ class UserRole(models.Model):
         verbose_name=_("Company"),
     )
 
+    objects = models.Manager()
+    company_objects = CompanyManager()
+
     def __str__(self) -> str:
         return self.name
 
@@ -52,11 +56,25 @@ class UserRole(models.Model):
     def get_permissions_code(self):
         return self.permissions.all().values_list("code", flat=True)
 
+    # this function is used to check if user has permission
     def has_permissions(self, permission_code):
         return permission_code in self.get_permissions_code
 
+    # this function is used to check if user has user management permission
     def has_user_management_permission(self):
         return self.has_permissions("user_management")
+
+    # this function is check if user is system admin
+    def is_system_admin(self) -> bool:
+        return self.code == self.ROLE_SYSTEM_ADDMIN
+
+    # this function is check if user is system employee
+    def is_system_employee(self) -> bool:
+        return self.code == self.ROLE_SYSTEM_EMPLOYEE
+
+    # this function is check if user is shipper
+    def is_shipper(self) -> bool:
+        return self.code == self.ROLE_SHIPPER
 
     class Meta:
         constraints = [
@@ -106,12 +124,12 @@ class Permission(models.Model):
 
 @receiver(post_migrate)
 def create_default_permissions(sender, **kwargs):
-    if sender.name == "system_admin":  # Thay 'your_app_name' bằng tên ứng dụng của bạn
+    if sender.name == "system_admin":  # replace 'system_admin' with your app name
         Permission = apps.get_model(
             "system_admin", "Permission"
-        )  # Thay 'your_app_name' bằng tên ứng dụng của bạn
+        )  # replace 'system_admin' with your app name
         if not Permission.objects.exists():
-            # Tạo các bản ghi Permission mặc định
+            # Create default permissions
             for item in Permission.ACTION:
                 Permission.objects.create(
                     name=f"{item} {Permission.ORDER['name']}",

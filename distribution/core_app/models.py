@@ -331,3 +331,51 @@ class Status(CreationModificationDateBase):
     class Meta:
         verbose_name = "Status"
         verbose_name_plural = "Statuses"
+
+
+class CompanyHistoryManager(models.Manager):
+    def get_queryset(self):
+        request = get_request()
+        if request:
+            user = request.user
+            if user.company:
+                return super().get_queryset().filter(company_id=user.company.id)
+            return (
+                super()
+                .get_queryset()
+                .filter(company_id=user.company_manager_related.id)
+            )
+        return super().get_queryset()
+
+
+class History(models.Model):
+    CREATE = "create"
+    UPDATE = "update"
+    DELETE = "delete"
+
+    ACTION_CHOICES = (
+        (CREATE, "Create"),
+        (UPDATE, "Update"),
+        (DELETE, "Delete"),
+    )
+
+    action = models.CharField(max_length=10, choices=ACTION_CHOICES)
+    model_name = models.CharField(max_length=100)
+    object_id = models.PositiveIntegerField()
+    company_id = models.PositiveIntegerField(null=True, blank=True)
+    data = models.JSONField()
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True
+    )
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    objects = models.Manager()
+    company_objects = CompanyHistoryManager()
+
+    def __str__(self):
+        return f"{self.action} - {self.model_name} - {self.object_id}"
+
+    class Meta:
+        ordering = ["-timestamp"]
+        verbose_name = "History"
+        verbose_name_plural = "Histories"

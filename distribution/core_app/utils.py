@@ -1,3 +1,7 @@
+import json
+from datetime import datetime
+
+
 def add_single_table(model: object, data: list):
     for item in data:
         if item and item != "" and item != "*":
@@ -26,17 +30,8 @@ class RelatedMixin:
         return queryset
 
 
-# import tinify
-
-# tinify.key = 'YOUR_API_KEY'
-
-# def compress_image(file):
-#     try:
-#         source = tinify.from_buffer(file.read())
-#         resized = source.resize(
-#             method="scale",
-#             width=1200
-#         )
-#         resized.to_file(file.name)
-#     except tinify.Error as e:
-#         print(e)
+class CustomJSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, datetime):
+            return obj.isoformat()
+        return super().default(obj)
