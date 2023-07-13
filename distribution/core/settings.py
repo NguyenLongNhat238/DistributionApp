@@ -163,7 +163,7 @@ LOCALE_PATHS = [
 LANGUAGE_CODE = "en-us"
 
 TIME_ZONE = "Asia/Ho_Chi_Minh"
-TIME_ZONE = "UTC"
+# TIME_ZONE = "UTC"
 
 USE_I18N = True
 USE_L10N = True
@@ -213,7 +213,6 @@ CORS_ALLOW_HEADERS = (
     "x-forwarded-proto",
     "timezone",
 )
-
 CSRF_TRUSTED_ORIGINS = [
     "https://oreal-api.officience.com",
     "http://oreal-api.officience.com",
@@ -266,8 +265,8 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 
-EMAIL_HOST_PASSWORD = 
+EMAIL_HOST_USER = ""
+EMAIL_HOST_PASSWORD = ""
 
 # swagger settings for drf_yasg
 SWAGGER_SETTINGS = {
